@@ -3,15 +3,19 @@ VENV_DIA := venv-diarize
 PYTHON := $(VENV)/bin/python3
 PIP := $(VENV)/bin/pip
 PIP_DIA := $(VENV_DIA)/bin/pip
-WHISPER := $(VENV)/bin/whisper
 WHISPERX := $(VENV_DIA)/bin/whisperx
+TRANSCRIBE := $(PYTHON) transcribe.py
+MODEL ?= turbo
+# Empty means auto-detect
+LANGUAGE ?=
+LANG_FLAG := $(if $(LANGUAGE),--language=$(LANGUAGE))
 
 .PHONY: setup setup-diarize transcribe diarize clean
 
 setup:
 	python3 -m venv $(VENV)
 	$(PIP) install --upgrade pip
-	$(PIP) install openai-whisper
+	$(PIP) install mlx-whisper
 
 # whisperX requires Python <3.14 due to ctranslate2 compatibility
 setup-diarize:
@@ -21,9 +25,9 @@ setup-diarize:
 
 transcribe:
 ifndef FILE
-	$(error FILE is required. Usage: make transcribe FILE=audio.mp3)
+	$(error FILE is required. Usage: make transcribe FILE=audio.mp3 [MODEL=turbo] [LANGUAGE=en])
 endif
-	$(WHISPER) "$(FILE)" --model medium --output_dir .
+	caffeinate -i $(TRANSCRIBE) --file="$(FILE)" --model=$(MODEL) $(LANG_FLAG)
 
 diarize:
 ifndef FILE
@@ -32,7 +36,7 @@ endif
 ifndef HF_TOKEN
 	$(error HF_TOKEN is required. Get it at https://huggingface.co/settings/tokens after accepting pyannote terms)
 endif
-	$(WHISPERX) "$(FILE)" --model medium --diarize --hf_token "$(HF_TOKEN)" --output_dir .
+	caffeinate -i $(WHISPERX) "$(FILE)" --model medium --diarize --hf_token "$(HF_TOKEN)" --output_dir .
 
 clean:
 	rm -rf $(VENV) $(VENV_DIA)
