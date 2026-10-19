@@ -1,0 +1,9 @@
+venv/
+venv-diarize/
+__pycache__/
+*.pyc
+*.json
+*.srt
+*.tsv
+*.txt
+*.vtt

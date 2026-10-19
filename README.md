@@ -18,23 +18,36 @@ This creates a virtual environment and installs Whisper (~1.5GB for the medium m
 ## Transcribe
 
 ```bash
-make transcribe FILE=audio.mp3
+python3 transcribe.py --file=/path/to/audio.m4a
 ```
 
-Output files (`.txt`, `.srt`, `.vtt`, `.tsv`, `.json`) are written to the current directory.
+Output files (`.txt`, `.srt`, `.vtt`, `.tsv`, `.json`) are written to the same directory as the input file by default.
 
 ## Options
 
-To change the model or language, edit the `transcribe` target in the Makefile:
-
 | Flag | Default | Options |
 |------|---------|---------|
-| `--model` | `medium` | `tiny`, `base`, `small`, `medium`, `large` |
+| `--file` | required | Path to the audio file |
+| `--output-dir` | same dir as input | Any directory path |
+| `--model` | `medium` | `tiny`, `base`, `small`, `medium`, `large`, `large-v2`, `large-v3` |
 | `--language` | `Portuguese` | Any language name or code |
-| `--output_format` | all | `txt`, `srt`, `vtt`, `tsv`, `json` |
+
+### Model comparison
+
+| Model | Size | VRAM | Speed | Accuracy |
+|-------|------|------|-------|----------|
+| `tiny` | 39M | ~1GB | ~32x | lowest |
+| `base` | 74M | ~1GB | ~16x | low |
+| `small` | 244M | ~2GB | ~6x | decent |
+| `medium` | 769M | ~5GB | ~2x | good |
+| `large` | 1.5GB | ~10GB | 1x | better |
+| `large-v2` | 1.5GB | ~10GB | 1x | better |
+| `large-v3` | 1.5GB | ~10GB | 1x | best |
+
+Speed is relative to `large`. For Portuguese, `large-v3` gives the best results.
 
 Example with custom options:
 
 ```bash
-venv/bin/whisper audio.mp3 --language Portuguese --model large --output_format srt --output_dir .
+python3 transcribe.py --file=/path/to/audio.m4a --model=large-v3 --output-dir=/tmp/transcripts
 ```
